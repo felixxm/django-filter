@@ -82,16 +82,14 @@ class DjangoFilterBackend(object):
             return None
         filter_instance = filter_class(request.query_params, queryset=queryset, request=request)
 
+        context = {'filter': filter_instance}
         try:
             template = loader.get_template(self.template)
+            return template.render(context, request)
         except TemplateDoesNotExist:
             template = Template(self.template_default)
-
-        context = RequestContext(request, {
-            'filter': filter_instance
-        })
-
-        return template.render(context)
+            context = RequestContext(request, context)
+            return template.render(context)
 
     def get_schema_fields(self, view):
         # This is not compatible with widgets where the query param differs from the
